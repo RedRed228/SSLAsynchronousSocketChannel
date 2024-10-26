@@ -174,7 +174,11 @@ public class SSLAsynchronousChannelGroup {
                 isShuttingDown = true; 
             }
         }
-        
+
+        if (channels.isEmpty()) {
+            group.shutdown();
+        }
+
         // define completion handler for shutdown of the channels 
         class ShutdownHandler implements CompletionHandler<Void, Void> { 
                                    
