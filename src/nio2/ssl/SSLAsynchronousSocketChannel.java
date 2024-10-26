@@ -50,6 +50,7 @@ import javax.naming.OperationNotSupportedException;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.SNIHostName;
 import javax.net.ssl.SNIServerName;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLException;
 import javax.net.ssl.SSLParameters;
@@ -251,12 +252,8 @@ public abstract class SSLAsynchronousSocketChannel {
     protected String savedHostName;
 
 
-    /**  Variables for initializing SSLContext **/
-
-    protected boolean initSSLContext;
-    protected KeyManager[] savedKeyMgr;
-    protected TrustManager[] savedTrustMgr;
-    protected SecureRandom savedSecureRand;
+    //SSLContext
+    protected SSLContext sslContext;
 
 
     /* ------------------------------------------------------------------------- */
@@ -269,7 +266,6 @@ public abstract class SSLAsynchronousSocketChannel {
 
         isOpen = true;
         setSNIHostName = false;
-        initSSLContext = false;
         connectionType = ConnectionType.UNKNOWN;
 
         netReadBufferState = new BufferState();
@@ -677,6 +673,7 @@ public abstract class SSLAsynchronousSocketChannel {
         }
 
         SSLParameters params = engine.getSSLParameters();
+        params.setEndpointIdentificationAlgorithm("HTTPS");
         List<SNIServerName> list = new ArrayList<>();
         list.add(new SNIHostName(hostName));
         params.setServerNames(list);
@@ -687,32 +684,17 @@ public abstract class SSLAsynchronousSocketChannel {
     /* ---------------- initSSLContext ----------------------------------------- */
     /* ------------------------------------------------------------------------- */
 
-    /** Initializes the SSLContext of the connetion.
+    /** Initializes the SSLContext of the connection.
      * <p>
-     * If the method is not called, the
-     * default implementations are used. Either of the first two parameters may be null
-     * in which case the installed security providers will be searched for the highest
-     * priority implementation of the appropriate factory. Likewise, the secure random
-     * parameter may be null in which case the default implementation will be used.
+     * If the method is not called, the default implementation
+     * SSLContext.getDefault() is used for the connection.
      * <p>
-     * Only the first instance of a particular key and/or trust manager implementation type
-     * in the array is used. (For example, only the first javax.net.ssl.X509KeyManager in the
-     * array will be used.)
-    * @param keyMgr
-    *        the sources of authentication keys or null
-    * @param trustMgr
-    *        the sources of peer authentication trust decisions or null
-    * @param secureRand
-    *        source of randomness for this generator or null
-    */
-    public void initSSLContext(KeyManager[] keyMgr, TrustManager[] trustMgr, SecureRandom secureRand) {
-
-        initSSLContext = true;
-        savedKeyMgr = keyMgr;
-        savedTrustMgr = trustMgr;
-        savedSecureRand = secureRand;
+     * @param sslContext
+     *        the SSLContext to be used for the connection.
+     */
+    public void setSslContext(SSLContext sslContext) {
+        this.sslContext = sslContext;
     }
-
 }
 
 

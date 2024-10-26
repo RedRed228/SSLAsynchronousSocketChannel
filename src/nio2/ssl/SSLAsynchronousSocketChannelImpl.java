@@ -118,12 +118,12 @@ public class SSLAsynchronousSocketChannelImpl extends SSLAsynchronousSocketChann
                 appDataStorage = new LinkedList<>();
                 appDataState = new LinkedList<>();
 
-                SSLContext context = SSLContext.getDefault();
+                SSLContext context = sslContext;
 
-                if (initSSLContext) {
-                    initSSLContext = false;
-                    context.init(savedKeyMgr, savedTrustMgr, savedSecureRand);
+                if ( context == null ) {
+                    context = SSLContext.getDefault();
                 }
+
                 engine = context.createSSLEngine();
                 engine.setUseClientMode(true);
                 if (setSNIHostName) {
